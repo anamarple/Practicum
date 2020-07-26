@@ -89,7 +89,11 @@ def place_in_dest(df, destination):
             master.update()
             time.sleep(0.5)
 
-            shutil.copyfile(source, target)
+            # Skip copying over files that have already been copied over
+            if os.path.exists(target):
+                next
+            else:
+                shutil.copyfile(source, target)
 
     # Message to user that files have been copied over
     message = messagebox.showinfo(title = None, message = "Done!")
