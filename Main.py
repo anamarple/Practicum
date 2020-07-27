@@ -61,7 +61,7 @@ def place_in_dest(df, destination):
     files = ['00 Previous', '01 General', '02 Volumetric and Reserves Estimates', '03 Production',
              '04 Development Plans',
              '05 Economics', '06 Field Reports', '07 Seismic Data', '08 Geologic Maps', '09 Bubble Maps',
-             '10 PVT and Text Data',
+             '10 PVT and Test Data',
              '11 Petrophysical Summaries', '12 Cross-Sections', '13 Logs', '15 Field Activity', '16 Modeling']
 
     # Create sub folders in destination if they don't exist already
