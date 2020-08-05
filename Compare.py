@@ -10,20 +10,25 @@ from sklearn.svm import LinearSVC  # SVM
 from sklearn.linear_model import LogisticRegression  # logistic regression
 from sklearn.ensemble import RandomForestClassifier  # random forest
 from Predict import predict_bucket2
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import *
 import matplotlib.pyplot as plt
 
 ########################################################################################################################
 # 1. Retrieve documents
+# Note: If driver not found, copy this in terminal: C:\Users\amarple\Downloads\AccessDatabaseEngine_X64.exe /passive
 # Read data in from 'File_Classifications_DB.accdb'
-conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\amarple\Desktop\DSA Practicum\File " \
-               r"Classifications DB.accdb "
+# conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=V:\APLA\users\arm\File " \
+#               r"Classifications DB.accdb "
+
+conn_str = r"Driver={ODBC Driver 17 for SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification;" \
+           "UID=DMFCUser;PWD=Ydo%A39&B0Sl;"
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
-SQL_Query = pd.read_sql_query("SELECT * FROM Data", conn)
+SQL_Query = pd.read_sql_query("SELECT * FROM [dbo].[Data]", conn)
 df = pd.DataFrame(SQL_Query, columns=['File', 'Path', 'Bucket', 'Bucket2'])
 
+# df = pd.read_excel(r'C:\Users\amarple\Desktop\DSA Practicum\Data\Consolidated.xlsx')
 
 ########################################################################################################################
 # 2. Pre-process/normalize df
@@ -300,3 +305,47 @@ for index, value in enumerate(b2_acc):
     plt.text(value, index + 0.2, str(round(value, 4)))
 
 ########################################################################################################################
+# Error Analysis Extended:
+
+''''
+# Accuracy, Precision, Recall, F1 Score
+# SVM w/ cv:
+print('SVM with cv: \n')
+class_rpt_svm_cv_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_svm_cv'])
+print(class_rpt_svm_cv_b2)
+
+
+# Confusion Matrix
+labels = results_df.Bucket2.unique().tolist()
+print(labels)
+
+cm = confusion_matrix(results_df['Bucket2'], results_df['Predicted_Bucket2_svm_cv'],
+                      labels = labels) #, normalize = 'true')
+cm_display = ConfusionMatrixDisplay(cm).plot()
+
+
+# SVM w/ tf-idf:
+print('SVM with tf-idf: \n')
+class_rpt_svm_tf_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_svm_tf'])
+print(class_rpt_svm_tf_b2)
+
+# Logistic Regression w/ cv:
+print('Logistic Regression with cv: \n')
+class_rpt_lr_cv_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_lr_cv'])
+print(class_rpt_lr_cv_b2)
+
+# Logistic Regression w/ tf-idf:
+print('Logistic Regression with tf-idf: \n')
+class_rpt_lr_tf_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_lr_tf'])
+print(class_rpt_lr_tf_b2)
+
+# Random Forest w/ cv:
+print('Random Forest with cv: \n')
+class_rpt_rf_cv_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_rf_cv'])
+print(class_rpt_rf_cv_b2)
+
+# Random Forest w/ tf-idf:
+print('Random Forest with tf-idf: \n')
+class_rpt_rf_tf_b2 = classification_report(results_df['Bucket2'], results_df['Predicted_Bucket2_rf_tf'])
+print(class_rpt_rf_tf_b2)
+'''''

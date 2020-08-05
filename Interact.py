@@ -1,10 +1,11 @@
+import sys
 import tkinter as tk
 from tkinter import messagebox
+import pyodbc
 from pandastable import Table
 from pandastable.dialogs import addButton
 from Main import classify, place_in_dest
 import os
-import pyodbc
 
 
 # Shows window to user w/ text entries for 'source' (where files are located) and 'destination' (where categorized
@@ -17,6 +18,9 @@ class input_locations:
 
         self.master.destroy()
         return
+
+    def cancel(self):
+        self.master.destroy()
 
     def __init__(self):
         self.master = tk.Tk()
@@ -37,6 +41,10 @@ class input_locations:
         # Add 'OK' button
         self.b1 = tk.Button(self.master, text = 'OK', command = self.submit)
         self.b1.grid(row = 3, column = 1)
+
+        # Direct to cancel method if 'X' button pressed
+        self.master.protocol("WM_DELETE_WINDOW", self.cancel)
+
         self.master.mainloop(1)
 
 
@@ -55,7 +63,7 @@ class results:
 
         # Add canvas & table
         self.canvas = tk.Canvas(self.root)
-        self.canvas.pack()
+        self.canvas.pack(fill = 'both', expand = True)
         self.pt = Table(self.canvas)
         self.pt.show()
         self.pt.model.df = df
@@ -76,21 +84,24 @@ class results:
 # Adds df to Access database to store categorizations to build/improve future model
 def add_df(df):
     # Connect to database
-    conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\amarple\Desktop\DSA Practicum\File " \
-               r"Classifications DB.accdb "
+    conn_str = r"Driver={ODBC Driver 17 for SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification" \
+               r";UID=DMFCUser;PWD=Ydo%A39&B0Sl; "
+    # conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=V:\APLA\users\arm\File " \
+    #           r"Classifications DB.accdb "
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
     # Remove duplicates first
     for index, row in df.iterrows():
         with conn.cursor() as crsr:
-            row = crsr.execute("DELETE * FROM Data "
-                               "WHERE (Path = '" + row["Path"] + "') "
-                               "AND (File = '" + row["File"] + "')")
+            row = crsr.execute("DELETE FROM [dbo].[Data] "
+                               "WHERE ([Path] = '" + row["Path"] + "') "
+                                                                   "AND ([File] = '" + row["File"] + "')")
 
     # Insert df into 'Data' table in Access DB
-    cursor.executemany(f"INSERT INTO Data (Path, File, Bucket, Bucket2) VALUES (?, ?, ?, ?)",
+    cursor.executemany(f"INSERT INTO [dbo].[Data] ([Path], [File], [Bucket], [Bucket2]) VALUES (?, ?, ?, ?)",
                        df.itertuples(index = False))
+
     conn.commit()
     conn.close()
     return
@@ -98,14 +109,13 @@ def add_df(df):
 
 # Driver for user interface
 def run():
-
     # Retrieve source and destination locations entered by user
     try:
         i = input_locations()
         source = i.source
         destination = i.destination
 
-    except AttributeError:
+    except AttributeError or TypeError:
         exit()
 
     try:
@@ -130,8 +140,9 @@ def run():
             run()
 
     # User exits out of window
-    except TypeError:
-        exit()
+    except AttributeError or TypeError:
+        i.cancel()
+        sys.exit()
 
 
 run()
