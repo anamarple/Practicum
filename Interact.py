@@ -21,6 +21,7 @@ class input_locations:
 
     def cancel(self):
         self.master.destroy()
+        sys.exit()
 
     def __init__(self):
         self.master = tk.Tk()
@@ -81,10 +82,10 @@ class results:
         self.root.mainloop(1)
 
 
-# Adds df to Access database to store categorizations to build/improve future model
+# Adds df to SQL Express database to store categorizations to build/improve future model
 def add_df(df):
     # Connect to database
-    conn_str = r"Driver={ODBC Driver 17 for SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification" \
+    conn_str = r"Driver={SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification" \
                r";UID=DMFCUser;PWD=Ydo%A39&B0Sl; "
     # conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=V:\APLA\users\arm\File " \
     #           r"Classifications DB.accdb "
@@ -98,7 +99,7 @@ def add_df(df):
                                "WHERE ([Path] = '" + row["Path"] + "') "
                                                                    "AND ([File] = '" + row["File"] + "')")
 
-    # Insert df into 'Data' table in Access DB
+    # Insert df into 'Data' table in SQL Express DB
     cursor.executemany(f"INSERT INTO [dbo].[Data] ([Path], [File], [Bucket], [Bucket2]) VALUES (?, ?, ?, ?)",
                        df.itertuples(index = False))
 
@@ -131,11 +132,11 @@ def run():
             r.run()
             place_in_dest(r.df_new, destination)
 
-            # Add df to 'File_Classifications_DB.accdb' to store info
+            # Add df to database to store info
             add_df(df)
 
         else:
-            # Show error message to user
+            # Invalid entry - show error message to user
             messagebox.showerror('Error', 'Source and/or Destination Entry Invalid, try again')
             run()
 

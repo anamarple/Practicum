@@ -39,8 +39,8 @@ def classify(source):
     z = predict_b2(norm_df, 'Bucket1', cv_l2_comp, cv_l2_geo, cv_l2_prod, cv_l2_gen, )
     norm_df['Bucket2'] = z
 
-    pd.set_option('display.max_columns', 3000)
-    pd.set_option('display.max_rows', 3000)
+    # pd.set_option('display.max_columns', 3000)
+    # pd.set_option('display.max_rows', 3000)
 
     return norm_df
 
@@ -58,6 +58,7 @@ def place_in_dest(df, destination):
     progress_bar.pack()
     master.update()
 
+    # Organized sub folders to create
     files = ['00 Previous', '01 General', '02 Volumetric and Reserves Estimates', '03 Production',
              '04 Development Plans',
              '05 Economics', '06 Field Reports', '07 Seismic Data', '08 Geologic Maps', '09 Bubble Maps',
@@ -92,8 +93,15 @@ def place_in_dest(df, destination):
             # Skip copying over files that have already been copied over
             if os.path.exists(target):
                 next
+
             else:
-                shutil.copyfile(source, target)
+                try:
+                    shutil.copyfile(source, target)
+
+                # Skip over files with path over 255 characters
+                except FileNotFoundError:
+                    messagebox.showerror('Error', 'File path over 255 characters, skipped: ' + target)
+                    next
 
     # Message to user that files have been copied over
     message = messagebox.showinfo(title = None, message = "Done!")

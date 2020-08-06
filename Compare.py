@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 # conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=V:\APLA\users\arm\File " \
 #               r"Classifications DB.accdb "
 
-conn_str = r"Driver={ODBC Driver 17 for SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification;" \
+conn_str = r"Driver={SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification;" \
            "UID=DMFCUser;PWD=Ydo%A39&B0Sl;"
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
@@ -59,7 +59,7 @@ df_train_eco = df_train[df_train['Target_Bucket'] == 'Economics']
 # 4. Feature engineering
 # Try and compare different methods: cv, tf-idf, word2vec (CBOW?)
 
-# First level bucket extraction: based on path
+# First level bucket extraction: based on path + file name
 # CV - level 1:
 cv = CountVectorizer(binary = False, min_df = 0.0, max_df = 1.0)
 train_features_cv = cv.fit_transform(train_path_norm)
