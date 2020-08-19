@@ -82,6 +82,8 @@ def place_in_dest(df, destination):
         for idx in df.index:
             source = str(df['Path'][idx]) + '\\' + str(df['File'][idx])  # source_path\filename.ext
             folder = get_folder(str(df['Bucket2'][idx]))
+
+            # TODO: give user option to preserve part of path structure to preserve organization
             target = destination + '\\' + folder + '\\' + str(df['File'][idx])  # dest_path\folder\filename.ext
 
             # This might take a minute as files are being copied over
@@ -104,6 +106,7 @@ def place_in_dest(df, destination):
                     next
 
     # Message to user that files have been copied over
+    master.destroy()
     message = messagebox.showinfo(title = None, message = "Done!")
 
     tk.mainloop(1)

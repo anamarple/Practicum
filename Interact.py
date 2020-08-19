@@ -1,11 +1,11 @@
-import sys
 import tkinter as tk
 from tkinter import messagebox
+import os
+import sys
 import pyodbc
 from pandastable import Table
 from pandastable.dialogs import addButton
 from Main import classify, place_in_dest
-import os
 
 
 # Shows window to user w/ text entries for 'source' (where files are located) and 'destination' (where categorized
@@ -45,7 +45,6 @@ class input_locations:
 
         # Direct to cancel method if 'X' button pressed
         self.master.protocol("WM_DELETE_WINDOW", self.cancel)
-
         self.master.mainloop(1)
 
 
@@ -111,13 +110,9 @@ def add_df(df):
 # Driver for user interface
 def run():
     # Retrieve source and destination locations entered by user
-    try:
-        i = input_locations()
-        source = i.source
-        destination = i.destination
-
-    except AttributeError or TypeError:
-        exit()
+    i = input_locations()
+    source = i.source
+    destination = i.destination
 
     try:
         # Source and destination are valid directories
@@ -127,13 +122,15 @@ def run():
             df = classify(source)
             df = df.drop(['Normalized_Path', 'Normalized_File'], axis = 1)
 
-            # Copy files over to destination
+            # Add df to database to store info
             r = results(df)
             r.run()
-            place_in_dest(r.df_new, destination)
+            add_df(r.df_new)
+            # place_in_dest(r.df_new, destination)
 
-            # Add df to database to store info
-            add_df(df)
+            # Copy files over to destination
+            # add_df(df)
+            place_in_dest(r.df_new, destination)
 
         else:
             # Invalid entry - show error message to user
