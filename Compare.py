@@ -2,7 +2,7 @@
 import pandas as pd
 import pyodbc
 import numpy as np
-from Normalize import normalize_df
+from Normalize import normalize_df, remove_punc
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer  # CV
 from sklearn.feature_extraction.text import TfidfVectorizer  # Tf-idf
@@ -26,13 +26,14 @@ conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
 SQL_Query = pd.read_sql_query("SELECT * FROM [dbo].[Data]", conn)
-df = pd.DataFrame(SQL_Query, columns=['File', 'Path', 'Bucket', 'Bucket2'])
+df = pd.DataFrame(SQL_Query, columns=['Path', 'File', 'Bucket', 'Bucket2'])
 
 # df = pd.read_excel(r'C:\Users\amarple\Desktop\DSA Practicum\Data\Consolidated.xlsx')
 
 ########################################################################################################################
 # 2. Pre-process/normalize df
 df = normalize_df(df)
+df = remove_punc(df)
 
 ########################################################################################################################
 # 3. Split df into test (2/3) and train (1/3) data
@@ -213,6 +214,9 @@ def predict_b2(df_input, col, cv_comp_input, cv_geo_input, cv_prod_input, cv_gen
 # SVM:
 # cv
 y = svm_l1_cv.predict(test_features_cv)
+# b1_confidence = svm_l1_cv.decision_function(test_features_cv)
+# print(b1_confidence)
+
 # tf-idf
 y2 = svm_l1_tf.predict(test_features_tf)
 

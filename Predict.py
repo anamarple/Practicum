@@ -1,8 +1,9 @@
+# TODO: If confidence of prediction is below a certain threshold, read contents of file depending on extension?
+#  b1_confidence = svm_l1_cv.decision_function(test_features_cv)
 
 
-# Predicts second bucket based off of first predicted bucket
-# Input: df, column name, vectorizer for e/ sub-bucket, and predictor for e/ sub-bucket
-# Returns: list of predicted bucket2 values
+# Predicts second bucket based off of first predicted bucket Input: df, column name, vectorizer for e/ sub-bucket,
+# and predictor for e/ sub-bucket Returns: list of predicted bucket2 values
 def predict_bucket2(df, col_name, vec_l2_comp, vec_l2_geo, vec_l2_prod, vec_l2_gen, pred_l2_comp, pred_l2_geo,
                     pred_l2_prod, pred_l2_gen):
     bucket2_pred = []
@@ -39,7 +40,6 @@ def predict_bucket2(df, col_name, vec_l2_comp, vec_l2_geo, vec_l2_prod, vec_l2_g
 # Input: Bucket2 category (ex: 'Presentations')
 # Returns: Sub folder name (ex: '01 General')
 def get_folder(name):
-
     if name == 'Previous':
         return '00 Previous'
 
