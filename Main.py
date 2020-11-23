@@ -7,7 +7,7 @@ import tkinter.ttk as ttk
 from tkinter import messagebox
 import time
 from Path_Reader import read
-from Normalize import normalize_df
+from Normalize import normalize_df, remove_punc
 from Compare import predict_b1, predict_b2, get_cv_l1, get_cv_l2
 from Predict import get_folder
 
@@ -18,6 +18,7 @@ from Predict import get_folder
 def classify(source):
     df = read(source)
     norm_df = normalize_df(df)
+    norm_df = remove_punc(norm_df)
 
     # Extract features for each bucket level
     # Level 1:
@@ -92,6 +93,8 @@ def place_in_dest(df, destination):
             master.update()
             time.sleep(0.5)
 
+            # TODO: Have date modified be a new column of data, replace if newer date modified available
+            #  (os.path.getmtime(file))
             # Skip copying over files that have already been copied over
             if os.path.exists(target):
                 next
