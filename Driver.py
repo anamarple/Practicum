@@ -14,8 +14,6 @@ def add_df(df):
     # Connect to database
     conn_str = r"Driver={SQL Server};Server=dm-sqlexpress\sqlexpress;Database=DMFileClassification" \
                r";UID=DMFCUser;PWD=Ydo%A39&B0Sl; "
-    # conn_str = r"Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=V:\APLA\users\arm\File " \
-    #           r"Classifications DB.accdb "
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -28,7 +26,7 @@ def add_df(df):
 
     # Insert df into 'Data' table in SQL Express DB
     cursor.executemany(f"INSERT INTO [dbo].[Data] ([Path], [File], [Bucket], [Bucket2]) VALUES (?, ?, ?, ?)",
-                       df.itertuples(index = False))
+                       df.itertuples(index=False))
 
     conn.commit()
     conn.close()
@@ -39,8 +37,9 @@ def add_df(df):
 # 3#capturing-output-from-an-external-program
 try:
     # Show form to user, get source and destination paths
-    output = subprocess.run([execLoc, scriptLoc], capture_output=True, text=True)
-    output = output.stdout.split("\n")
+    output = subprocess.run([execLoc, scriptLoc], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, shell=False, creationflags=0x08000000)
+    output = output.stdout.decode('utf-8').split("\r\n")
 
     sourcePath = output[0]
     destPath = output[1]
@@ -62,20 +61,25 @@ try:
 
     # Return df to user, give them chance to fix categorizations
     resultsLoc = r'C:/Users/amarple/PycharmProjects/Practicum/IronPython_Results.py'
-    x = subprocess.run([execLoc, resultsLoc], input = result, capture_output=True)
+    x = subprocess.Popen([execLoc, resultsLoc], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=False, creationflags=0x08000000)
+    x.stdin.write(result)
+    output = x.communicate()[0]
+    x.stdin.close()
 
     # Read output from IronPython_Results script into df
-    x = x.stdout.decode('utf-8').split("\r\n")
-    x.remove("")
-    x_array = np.array(x)
-    x_reshape = np.reshape(x_array, (-1, 4))
-    df_final = pd.DataFrame(x_reshape, columns=['Path', 'File', 'Bucket', 'Bucket2'])
+    output = output.decode('utf-8').split("\r\n")
+    output.remove("")
+    output_array = np.array(output)
+    output_reshape = np.reshape(output_array, (-1, 4))
+    df_final = pd.DataFrame(output_reshape, columns=['Path', 'File', 'Bucket', 'Bucket2'])
 
     # Add df to database
     add_df(df_final)
 
     # Copy files over to destination
     place_in_dest(df_final, destPath)
+
 
 # User exits out of wpf form
 except IndexError:
